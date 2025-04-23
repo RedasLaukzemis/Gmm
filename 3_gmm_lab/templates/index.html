@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Image Mask Viewer</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 40px;
+      background-color: #f2f2f2;
+      text-align: center;
+    }
+    input[type="file"] {
+      margin-bottom: 20px;
+    }
+    img {
+      max-width: 100%;
+      height: auto;
+      margin: 10px 0;
+    }
+    #preview {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Upload Image for Mask Prediction</h1>
+  <input type="file" id="imageUpload" accept="image/*">
+  <button onclick="uploadImage()">Submit</button>
+
+  <div id="preview">
+    <h3>Masked Image:</h3>
+    <img id="outputImage" src="" alt="Result will appear here">
+  </div>
+
+  <script>
+    async function uploadImage() {
+      const fileInput = document.getElementById('imageUpload');
+      const file = fileInput.files[0];
+      if (!file) {
+        alert('Please select an image.');
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('file', file);
+
+      try {
+        const response = await fetch('/predict', {
+          method: 'POST',
+          body: formData
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          alert('Error: ' + error.error);
+          return;
+        }
+
+        const blob = await response.blob();
+        const imageUrl = URL.createObjectURL(blob);
+        document.getElementById('outputImage').src = imageUrl;
+
+      } catch (err) {
+        alert('Failed to upload image: ' + err.message);
+      }
+    }
+  </script>
+
+</body>
+</html>
